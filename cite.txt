@@ -1,0 +1,33 @@
+Copies of these documents are located in the ref directory.
+
+(https://www.flhsmv.gov/pdf/driver-vehiclereports/motorcycleendorsementhistory.pdf)
+The Department of Highway Safety and Motor Vehilces (Florida)
+
+Table 1. Intercensal Estimates of the Resident Population for Counties of Florida: April 1, 2000 to July 1, 2010 (CO-EST00INT-01-12)
+Source: U.S. Census Bureau, Population Division
+Release Date: September 2011
+
+Intercensal Estimates of the Resident Population for Counties in Florida: April 1, 2010 to April 1, 2020 (CO-EST2020INT-POP-12)
+Source: U.S. Census Bureau, Population Division
+Release Date: November 2024
+
+Annual Estimates of the Resident Population for Counties in Florida: April 1, 2020 to July 1, 2023 (CO-EST2023-POP-12)
+Source: U.S. Census Bureau, Population Division
+Release Date: March 2024
+
+Table 1. Intercensal Estimates of the Resident Population by Sex and Age for the United States: April 1, 2000 to July 1, 2010 (US-EST00INT-01)
+Source: U.S. Census Bureau, Population Division
+Release Date:September 2011
+
+Table 1. Annual Estimates of the Resident Population for the United States, Regions, States, and Puerto Rico: April 1, 2010 to July 1, 2019 (NST-EST2019-01)
+Source: U.S. Census Bureau, Population Division
+Release Date: December 2019
+
+Annual Estimates of the Resident Population for the United States, Regions, States, District of Columbia, and Puerto Rico: April 1, 2020 to July 1, 2024 (NST-EST2024-POP)
+Source: U.S. Census Bureau, Population Division
+Release Date: December 2024
+
+A copy of this file isn't included.
+
+(https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_county_20m.zip)
+U.S. Department of Commerce, U.S. Census Bureau, Geography Division
