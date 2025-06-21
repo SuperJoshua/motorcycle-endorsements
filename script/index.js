@@ -32,23 +32,24 @@ for (const year of years) {
 # population per county / population per state %
 */
 
-console.log(counties_by_year["2009"])
-
 const counties_by_name = {}
 for (const name of names) {
    counties_by_name[name] = counties.filter(d => d["region"] == name)
 }
 
 const map_plot = Plot.plot({
-   "height": 600,
-   "width": 600,
+   //"height": 600,
+   //"width": 600,
+   "aspectRatio": 1,
+   "grid": true,
    "color": {
       "legend": true,
       "label": "population",
       "type": "linear"
    },
+   "x": {"axis": null},
+   "y": {"axis": null},
    "marks": [
-      //Plot.geo(map, {"stroke": "black"})
       Plot.geo(map, {"fill": (d) => counties_by_year["2009"][d["properties"]["NAME"]]["population"]})
    ]
 })
@@ -56,11 +57,13 @@ const map_plot = Plot.plot({
 map_el.append(map_plot)
 
 const graph_plot = Plot.plot({
-   "width": 600,
-   "height": 600,
-   "y": {"type": "log"},
+   //"width": 600,
+   //"height": 600,
+   "y": {"transform": d => d / 1000},
    "marks": [
-      Plot.lineY(counties, {"x": "year", "y": "endorsements", "stroke": "region"})
+      Plot.lineY(counties_by_name["Highlands"], {"x": d => new Date(d["year"], 0), "y": "endorsements", "stroke": "region"}),
+      Plot.axisX({"anchor": "bottom", "labelAnchor": "center", "label": "year", "labelArrow": "none", "ticks": years.length}),
+      Plot.axisY({"anchor": "left", "labelAnchor": "center", "label": "endorsements ( thousands )", "labelArrow": "none"})
    ]
 })
 
