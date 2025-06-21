@@ -4,7 +4,7 @@
 
 This is a project that occurred to me, while looking up information on titling my bike, before moving to Florida, as being a fun way to apply what I'd been learning. What sparked it was a curious entry on the motorcycle endorsements table that I've mentioned below, in the Notes.
 
-To make the project statistically more interesting, I've also added population information for the counties, state of Florida, and the USA.
+To make the project statistically more interesting, I've also added population information for the counties, state of Florida, and the USA. ... I didn't actually end up using the national population for anything, though.
 
 ## Considerations
 

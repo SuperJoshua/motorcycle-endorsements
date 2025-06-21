@@ -10,7 +10,7 @@ const counties = stats.filter(d => !(d["region"] == "Florida" || d["region"] == 
 const florida = stats.filter(d => d["region"] == "Florida")
 const usa = stats.filter(d => d["region"] == "USA")
 
-const years = florida.map(d => d["year"])
+const years = florida.map(d => String(d["year"]))
 const names = [... new Set(counties.map(d => d["region"]))]
 
 const counties_by_year = {}
@@ -23,16 +23,30 @@ for (const year of years) {
    }
 }
 
-console.log(counties_by_year["2009"])
 /*
+# endorsements per county
+# population per county
+# endorsements per county / population per county %
+# endorsements per county / population per state %
+# endorsements per county / endorsements per state %
+# population per county / population per state %
+*/
+
+console.log(counties_by_year["2009"])
+
 const counties_by_name = {}
 for (const name of names) {
    counties_by_name[name] = counties.filter(d => d["region"] == name)
 }
-*/
+
 const map_plot = Plot.plot({
    "height": 600,
    "width": 600,
+   "color": {
+      "legend": true,
+      "label": "population",
+      "type": "linear"
+   },
    "marks": [
       //Plot.geo(map, {"stroke": "black"})
       Plot.geo(map, {"fill": (d) => counties_by_year["2009"][d["properties"]["NAME"]]["population"]})
