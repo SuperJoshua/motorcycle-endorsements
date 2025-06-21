@@ -3,8 +3,8 @@
 const stats = await d3.json("../res/stats.json")
 const map = await d3.json("../res/florida.json")
 
-const map_el = document.querySelector("#map")
-const graph_el = document.querySelector("#graph")
+const map_el = document.querySelector("#choropleth")
+const graph_el = document.querySelector("#line_graph")
 
 const counties = stats.filter(d => !(d["region"] == "Florida" || d["region"] == "USA"))
 const florida = stats.filter(d => d["region"] == "Florida")
@@ -12,7 +12,7 @@ const usa = stats.filter(d => d["region"] == "USA")
 
 const years = florida.map(d => String(d["year"]))
 const names = [... new Set(counties.map(d => d["region"]))]
-
+console.log(names)
 const counties_by_year = {}
 for (const year of years) {
    counties_by_year[year] = {}
@@ -44,13 +44,13 @@ const map_plot = Plot.plot({
    "grid": true,
    "color": {
       "legend": true,
-      "label": "population",
+      "label": "endorsements",
       "type": "linear"
    },
    "x": {"axis": null},
    "y": {"axis": null},
    "marks": [
-      Plot.geo(map, {"fill": (d) => counties_by_year["2009"][d["properties"]["NAME"]]["population"]})
+      Plot.geo(map, {"fill": (d) => counties_by_year["2009"][d["properties"]["NAME"]]["endorsements"]})
    ]
 })
 
@@ -61,7 +61,7 @@ const graph_plot = Plot.plot({
    //"height": 600,
    "y": {"transform": d => d / 1000},
    "marks": [
-      Plot.lineY(counties_by_name["Highlands"], {"x": d => new Date(d["year"], 0), "y": "endorsements", "stroke": "region"}),
+      Plot.lineY(counties_by_name["Highlands"], {"x": d => new Date(d["year"], 6, 1), "y": "endorsements", "stroke": "region"}),
       Plot.axisX({"anchor": "bottom", "labelAnchor": "center", "label": "year", "labelArrow": "none", "ticks": years.length}),
       Plot.axisY({"anchor": "left", "labelAnchor": "center", "label": "endorsements ( thousands )", "labelArrow": "none"})
    ]
