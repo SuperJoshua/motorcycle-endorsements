@@ -4,8 +4,6 @@
 
 This is a project that occurred to me, while looking up information on titling my bike, before moving to Florida, as being a fun way to apply what I'd been learning. What sparked it was a curious entry on the motorcycle endorsements table that I've mentioned below, in the Notes.
 
-To make the project statistically more interesting, I've also added population information for the counties, state of Florida, and the USA. ... I didn't actually end up using the national population for anything, though.
-
 ## Considerations
 
 All of the temporal data is in years, regardless of anything more specific. This, naturally, makes the visualization fuzzy, at best. This is especially true with the population data, since a census isn't taken every year, and it is already being interpolated. This is all done for simplicity, to put everything on a common, unreliable footing.
@@ -18,7 +16,7 @@ However, endorsements are endorsements, so I left the totals. I'm guessing what 
 
 ## Notes
 
-Highlands county had a remarkable increase in endorsements in 2016, with a swift drop in 2017 -- this seems like a data entry error. This is also the reason for pursuing this project.
+Highlands county had a remarkable increase in endorsements in 2016, with a swift drop in 2017 -- this seems like a data entry error, though, if it is, it's not clear how. This is also the reason for pursuing this project.
 
 During the course of graphing, I noticed another anomaly. Jefferson county had a sharp increase in endorsements in 2015, with a similarly precipitous drop the following year.
 
