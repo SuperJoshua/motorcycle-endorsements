@@ -15,36 +15,14 @@
          <h1>Florida Motorcycle Endorsements 2009 through 2023</h1>
       </header>
       <form id="map_form">
-         <label for="map_data">data:</label>
-         <select id="map_data" name="map_data">
-            <option value="epc">endorsements per county</option>
-            <option value="ppc">population per county</option>
-            <option value="epc_eps">endorsements per county / endorsements per state</option>
-            <option value="epc_ppc">endorsements per county / population per county</option>
-            <option value="epc_pps">endorsements per county / population per state</option>
-            <option value="ppc_pps">population per county / population per state</option>
-         </select>
-         <label for="map_year">year:</label>
-         <select id="map_year" name="map_year">
-            <option value="2009">2009</option>
-            <option value="2010">2010</option>
-            <option value="2011">2011</option>
-            <option value="2012">2012</option>
-            <option value="2013">2013</option>
-            <option value="2014">2014</option>
-            <option value="2015">2015</option>
-            <option value="2016">2016</option>
-            <option value="2017">2017</option>
-            <option value="2018">2018</option>
-            <option value="2019">2019</option>
-            <option value="2020">2020</option>
-            <option value="2021">2021</option>
-            <option value="2022">2022</option>
-            <option value="2023">2023</option>
-         </select>
+         <label for="map_data">Counties by </label>
+         <select id="map_data" name="map_data"></select>
+         <label for="map_year">for the year </label>
+         <select id="map_year" name="map_year"></select>
       </form>
       <div id="choropleth"></div>
-      <div id="line_graph"></div>
+      <div id="line_quantity"></div>
+      <div id="line_percent"></div>
       <footer>
          Citations and source code can be found on <a href="">GitHub</a>.
       </footer>
