@@ -6,8 +6,7 @@ const map = await d3.json("../res/map.json")
 
 // div elements
 const map_el = document.querySelector("#choropleth")
-const line_percent_el = document.querySelector("#line_percent")
-const line_quantity_el = document.querySelector("#line_quantity")
+const line_graph_el = document.querySelector("#line_graph")
 
 // select elements
 const map_data_el = document.querySelector("#map_data")
@@ -39,28 +38,28 @@ for (const y of years) {
 
 for (const y in cby) {
    for (const c in cby[y]) {
-      cby[y][c]["endorsements per county / county population"] = cby[y][c]["endorsements"] / cby[y][c]["population"]
-      cby[y][c]["endorsements per county / state population"] = cby[y][c]["endorsements"] / fby[y]["population"]
-      cby[y][c]["endorsements per county / state endorsements"] = cby[y][c]["endorsements"] / fby[y]["endorsements"]
-      cby[y][c]["county population / state population"] = cby[y][c]["population"] / fby[y]["population"]
+      cby[y][c]["endorsements per county / county population"] = cby[y][c]["endorsements"] / cby[y][c]["population"] * 100
+      cby[y][c]["endorsements per county / state population"] = cby[y][c]["endorsements"] / fby[y]["population"] * 100
+      cby[y][c]["endorsements per county / state endorsements"] = cby[y][c]["endorsements"] / fby[y]["endorsements"] * 100
+      cby[y][c]["county population / state population"] = cby[y][c]["population"] / fby[y]["population"] * 100
 
       if (y == 2009) {
          cby[y][c]["endorsement difference"] = 0
-         cby[y][c]["endorsement percentage difference"] = 0
+         cby[y][c]["endorsement percent difference"] = 0
          cby[y][c]["population difference"] = 0
-         cby[y][c]["population percentage difference"] = 0
+         cby[y][c]["population percent difference"] = 0
       }
       else {
          cby[y][c]["endorsement difference"] = cby[y][c]["endorsements"] - cby[y - 1][c]["endorsements"]
-         cby[y][c]["endorsement percentage difference"] = cby[y][c]["endorsement difference"] / cby[y - 1][c]["endorsements"]
+         cby[y][c]["endorsement percent difference"] = cby[y][c]["endorsement difference"] / cby[y - 1][c]["endorsements"] * 100
          cby[y][c]["population difference"] = cby[y][c]["population"] - cby[y - 1][c]["population"]
-         cby[y][c]["population percentage difference"] = cby[y][c]["population difference"] / cby[y - 1][c]["population"]
+         cby[y][c]["population percent difference"] = cby[y][c]["population difference"] / cby[y - 1][c]["population"] * 100
       }
    }
 }
 
 const data_types = Object.keys(cby[years[0]][names[0]]).filter(k => !(k == "county" || k == "year"))
-console.log(data_types)
+
 const counties_by_name = {}
 for (const name of names) {
    counties_by_name[name] = counties.filter(d => d["county"] == name)
@@ -83,20 +82,26 @@ for (const d of data_types) {
    map_data_el.append(o)
 }
 
-// selected year, selected data...
-let sy = "2009" || map_year_el.value
-let sd = "endorsements" || map_data_el.value
-console.log(map_year_el.value, map_data_el.value)
+// selected year, selected data, selected county...
+let sy = map_year_el.value
+let sd = map_data_el.value
+let sc = names[0]
+
+map_year_el.addEventListener("change", draw_map)
+map_data_el.addEventListener("change", draw_map)
 
 draw_map()
-draw_graph()
 
+/*
+And after trying to get things dynamic... how am I supposed to sort the graphs between linear and percentage? I'm still hand-coding this thing. Not that I'm against that, but this is unintentionally hybrid.
+*/
 function draw_map() {
+   sy = map_year_el.value
+   sd = map_data_el.value
+
    map_el.innerHTML = ""
-   
+
    const map_plot = Plot.plot({
-      //"height": 600,
-      //"width": 600,
       "aspectRatio": 1,
       "caption": "Click on a county to populate the line graphs.",
       "color": {
@@ -119,28 +124,37 @@ function draw_map() {
    })
 
    map_el.append(map_plot)
+
+   draw_graphs()
 }
 
-function draw_graph() {
-   line_quantity_el.innerHTML = ""
+/*
+I originally envisioned being able to compare counties (even all of them simultaneously), but, as this seemingly simple (probably actually simple) project kept taking longer to realize, I cut it to one county and tied selection to the choropleth.
+*/
+function draw_graphs() {
+   const county = []
+   for (const y in cby) {
+      for (const c in cby[y]) {
+         if (c == sc) {
+            county.push(cby[y][c])
+         }
+      }
+   }
    
-   const graph_plot = Plot.plot({
-      //"width": 600,
-      //"height": 600,
+   line_graph_el.innerHTML = ""
+
+   let plot = Plot.plot({
       "x": {"type": "point"},
-      "y": {"transform": d => d / 1000},
       "marks": [
-         Plot.lineY(counties_by_name["Highlands"], {
-            //"x": d => new Date(d["year"], 0),
+         Plot.lineY(county, {
             "x": "year",
             "y": "endorsements",
-            "stroke": "county",
+            "stroke": "orange",
          }),
-         Plot.tip(counties_by_name["Highlands"], Plot.pointer({
+         Plot.tip(county, Plot.pointerX({
             "x": "year",
             "y": "endorsements",
-            "stroke": "county",
-            "title": d => `year: ${d["year"]}\nendorsements: ${d["endorsements"]}`
+            "title": d => `year: ${d["year"]}\nendorsements: ${d["endorsements"]}\nendorsement difference: ${d["endorsement difference"]}, ${d["endorsement percent difference"].toFixed(2)}%`
          })),
          Plot.axisX({
             "anchor": "bottom",
@@ -152,11 +166,126 @@ function draw_graph() {
          Plot.axisY({
             "anchor": "left",
             "labelAnchor": "center",
-            "label": "endorsements ( thousands )",
+            "label": "endorsements",
             "labelArrow": "none"
          })
       ]
    })
 
-   line_quantity_el.append(graph_plot)
+   line_graph_el.append(plot)
+   
+   plot = Plot.plot({
+      "x": {"type": "point"},
+      "marks": [
+         Plot.lineY(county, {
+            "x": "year",
+            "y": "population",
+            "stroke": "blue",
+         }),
+         Plot.tip(county, Plot.pointerX({
+            "x": "year",
+            "y": "population",
+            "title": d => `year: ${d["year"]}\npopulation: ${d["population"]}\npopulation difference: ${d["population difference"]}, ${d["population percent difference"].toFixed(2)}%`
+         })),
+         Plot.axisX({
+            "anchor": "bottom",
+            "labelAnchor": "center",
+            "label": "year",
+            "labelArrow": "none",
+            "ticks": years.length
+         }),
+         Plot.axisY({
+            "anchor": "left",
+            "labelAnchor": "center",
+            "label": "population",
+            "labelArrow": "none"
+         })
+      ]
+   })
+
+   line_graph_el.append(plot)
+
+   plot = Plot.plot({
+      "x": {"type": "point"},
+      "marks": [
+         Plot.ruleY([0]),
+         Plot.lineY(county, {
+            "x": "year",
+            "y": "endorsement percent difference",
+            "stroke": "orange"
+         }),
+         Plot.lineY(county, {
+            "x": "year",
+            "y": "population percent difference",
+            "stroke": "blue"
+         }),
+         Plot.tip(county, Plot.pointerX({
+            "x": "year",
+            "y": "endorsement percent difference",
+            "title": d => `year: ${d["year"]}\nendorsement difference: ${d["endorsement difference"]}, ${d["endorsement percent difference"].toFixed(2)}%\npopulation difference: ${d["population difference"]}, ${d["population percent difference"].toFixed(2)}%`
+         })),
+         Plot.axisX({
+            "anchor": "bottom",
+            "labelAnchor": "center",
+            "label": "year",
+            "labelArrow": "none",
+            "ticks": years.length
+         }),
+         Plot.axisY({
+            "anchor": "left",
+            "labelAnchor": "center",
+            "label": "percent",
+            "labelArrow": "none"
+         })
+      ]
+   })
+
+   line_graph_el.append(plot)
+
+   plot = Plot.plot({
+      "x": {"type": "point"},
+      "marks": [
+         Plot.ruleY([0]),
+         Plot.lineY(county, {
+            "x": "year",
+            "y": "endorsements per county / county population",
+            "stroke": "red",
+         }),
+         Plot.lineY(county, {
+            "x": "year",
+            "y": "endorsements per county / state population",
+            "stroke": "orange",
+         }),
+         Plot.lineY(county, {
+            "x": "year",
+            "y": "endorsements per county / state endorsements",
+            "stroke": "yellow",
+         }),
+         Plot.lineY(county, {
+            "x": "year",
+            "y": "county population / state population",
+            "stroke": "green",
+         }),
+         Plot.tip(county, Plot.pointerX({
+            "x": "year",
+            "y": "endorsements per county / county population",
+            "title": d => `fill me in`
+         })),
+         Plot.axisX({
+            "anchor": "bottom",
+            "labelAnchor": "center",
+            "label": "year",
+            "labelArrow": "none",
+            "ticks": years.length
+         }),
+         Plot.axisY({
+            "anchor": "left",
+            "labelAnchor": "center",
+            "label": "percent",
+            "labelArrow": "none"
+         })
+      ]
+   })
+
+   line_graph_el.append(plot)
 }
