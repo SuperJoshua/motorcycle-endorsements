@@ -14,15 +14,17 @@ animate_map_button.addEventListener("click", animate_map)
 
 // select elements
 const map_data_el = document.querySelector("#map_data")
+map_data_el.addEventListener("change", draw_map)
 const map_year_el = document.querySelector("#map_year")
-
-const years = florida.map(d => d["year"]).sort()
-const names = [... new Set(counties.map(d => d["county"]))]
+map_year_el.addEventListener("change", draw_map)
 
 /*
 What is this mess? This is me trying to keep the file size down by calculating all of these values from the few, rather than having them all precalculated in a big file.
 */
 // Begin mess...
+const years = florida.map(d => d["year"]).sort()
+const names = [... new Set(counties.map(d => d["county"]))]
+
 // florida by year...
 const fby = {}
 let fby_index = 0
@@ -40,13 +42,9 @@ for (const y of years) {
    }
 }
 
+// calculate extra values
 for (const y in cby) {
    for (const c in cby[y]) {
-      cby[y][c]["endorsements per county / county population"] = cby[y][c]["endorsements"] / cby[y][c]["population"] * 100
-      cby[y][c]["endorsements per county / state population"] = cby[y][c]["endorsements"] / fby[y]["population"] * 100
-      cby[y][c]["endorsements per county / state endorsements"] = cby[y][c]["endorsements"] / fby[y]["endorsements"] * 100
-      cby[y][c]["county population / state population"] = cby[y][c]["population"] / fby[y]["population"] * 100
-
       if (y == 2009) {
          cby[y][c]["endorsement difference"] = 0
          cby[y][c]["endorsement percent difference"] = 0
@@ -59,16 +57,17 @@ for (const y in cby) {
          cby[y][c]["population difference"] = cby[y][c]["population"] - cby[y - 1][c]["population"]
          cby[y][c]["population percent difference"] = cby[y][c]["population difference"] / cby[y - 1][c]["population"] * 100
       }
+
+      cby[y][c]["endorsements per county / county population"] = cby[y][c]["endorsements"] / cby[y][c]["population"] * 100
+      cby[y][c]["endorsements per county / state population"] = cby[y][c]["endorsements"] / fby[y]["population"] * 100
+      cby[y][c]["endorsements per county / state endorsements"] = cby[y][c]["endorsements"] / fby[y]["endorsements"] * 100
+      cby[y][c]["county population / state population"] = cby[y][c]["population"] / fby[y]["population"] * 100
+      cby[y][c]["state endorsements"] = fby[y]["endorsements"]
+      cby[y][c]["state population"] = fby[y]["population"]
    }
 }
 
 const data_types = Object.keys(cby[years[0]][names[0]]).filter(k => !(k == "county" || k == "year"))
-
-const counties_by_name = {}
-for (const name of names) {
-   counties_by_name[name] = counties.filter(d => d["county"] == name)
-}
-
 // End mess... At least, the former mess.
 
 // add options
@@ -89,17 +88,11 @@ for (const d of data_types) {
 // selected year, selected data, selected county...
 let sy = map_year_el.value
 let sd = map_data_el.value
-let sc = names[names.indexOf("Highlands")]
-
-map_year_el.addEventListener("change", draw_map)
-map_data_el.addEventListener("change", draw_map)
-
-draw_map()
-draw_graphs()
+let sc = names[names.indexOf("Miami-Dade")]
 
 function animate_map() {
    let t = 0
-   const delay = 500
+   const delay = 200
    for (const year of years) {
       setTimeout(() => {
          map_year_el.value = year
@@ -123,6 +116,7 @@ function draw_map() {
       "caption": "Click on a county to populate the line graphs.",
       "color": {
          "legend": true,
+         "scheme": "Greens",
          "type": "linear"
       },
       "x": {"axis": null},
@@ -130,6 +124,7 @@ function draw_map() {
       "marks": [
          Plot.geo(map, {
             "fill": d => cby[sy][d["properties"]["NAME"]][sd],
+            "stroke": "black",
             "tip": "xy"
          })
       ]
@@ -140,6 +135,8 @@ function draw_map() {
 
 /*
 I originally envisioned being able to compare counties (even all of them simultaneously), but, as this seemingly simple (probably actually simple) project kept taking longer to realize, I cut it to one county and tied selection to the choropleth.
+
+Also, I thought to draw more lines on each graph, but when I did this, the lines were too confusing and indistinct. Graphing them separately exaggerates them -- another problem -- but at least it's clearer.
 */
 function draw_graphs() {
    const county = []
@@ -154,20 +151,32 @@ function draw_graphs() {
    line_graph_el.innerHTML = ""
 
    let line_plot = Plot.plot({
-      "title": `Motorcycle Endorsements in ${sc} County`,
+      "title": `Motorcycle Endorsements of ${sc} County`,
       "x": {"type": "point"},
-      "y": {"labelAnchor": "center", "labelArrow": "none"},
+      "y": {"label": null},
       "marks": [
          Plot.lineY(county, {
             "x": "year",
             "y": "endorsements",
-            "stroke": "orange",
-         }),
-         Plot.tip(county, Plot.pointerX({
-            "x": "year",
-            "y": "endorsements",
-            "title": d => `year: ${d["year"]}\nendorsements: ${d["endorsements"]}\nendorsement difference: ${d["endorsement difference"]}, ${d["endorsement percent difference"].toFixed(2)}%`
-         }))
+            "channels": {
+               "endorsement difference": {
+                  "label": "difference",
+                  "value": "endorsement difference"
+               },
+               "endorsement percent difference": {
+                  "label": "% change",
+                  "value": "endorsement percent difference"
+               }
+            },
+            "tip": {
+               "format": {
+                  "x": true,
+                  "y": true,
+                  "endorsement difference": true,
+                  "endorsement percent difference": d => `${d.toFixed(2)} %`
+               }
+            }
+         })
       ]
    })
 
@@ -176,82 +185,235 @@ function draw_graphs() {
    line_plot = Plot.plot({
       "title": `Population of ${sc} County`,
       "x": {"type": "point"},
-      "y": {"labelAnchor": "center", "labelArrow": "none"},
+      "y": {"label": null},
       "marks": [
          Plot.lineY(county, {
             "x": "year",
             "y": "population",
-            "stroke": "blue",
-         }),
-         Plot.tip(county, Plot.pointerX({
-            "x": "year",
-            "y": "population",
-            "title": d => `year: ${d["year"]}\npopulation: ${d["population"]}\npopulation difference: ${d["population difference"]}, ${d["population percent difference"].toFixed(2)}%`
-         }))
+            "channels": {
+               "population difference": {
+                  "label": "difference",
+                  "value": "population difference"
+               },
+               "population percent difference": {
+                  "label": "% change",
+                  "value": "population percent difference"
+               }
+            },
+            "tip": {
+               "format": {
+                  "x": true,
+                  "y": true,
+                  "population difference": true,
+                  "population percent difference": d => `${d.toFixed(2)} %`
+               }
+            }
+         })
       ]
    })
 
    line_graph_el.append(line_plot)
 
    line_plot = Plot.plot({
-      "title": `Percent Change in Endorsements and Population in ${sc} County`,
+      "title": `Percent Change in Endorsements of ${sc} County`,
       "x": {"type": "point"},
-      "y": {"labelAnchor": "center", "labelArrow": "none", "label": "%"},
+      "y": {"label": null},
       "marks": [
          Plot.ruleY([0]),
          Plot.lineY(county, {
             "x": "year",
-            "y": "endorsement percent difference",
-            "stroke": "orange"
-         }),
-         Plot.lineY(county, {
-            "x": "year",
-            "y": "population percent difference",
-            "stroke": "blue"
-         }),
-         Plot.tip(county, Plot.pointerX({
-            "x": "year",
-            "y": "endorsement percent difference",
-            "title": d => `year: ${d["year"]}\nendorsement difference: ${d["endorsement difference"]}, ${d["endorsement percent difference"].toFixed(2)}%\npopulation difference: ${d["population difference"]}, ${d["population percent difference"].toFixed(2)}%`
-         }))
+            "y": {
+               "label": "% change",
+               "value": "endorsement percent difference"
+            },
+            "channels": {
+               "endorsement difference": {
+                  "label": "difference",
+                  "value": "endorsement difference"
+               }
+            },
+            "tip": {
+               "format": {
+                  "x": true,
+                  "y": d => `${d.toFixed(2)} %`,
+                  "endorsement difference": true
+               }
+            }
+         })
       ]
    })
 
    line_graph_el.append(line_plot)
 
    line_plot = Plot.plot({
-      "title": `Some Ratios of ${sc} County`,
+      "title": `Percent Change in Population of ${sc} County`,
       "x": {"type": "point"},
-      "y": {"labelAnchor": "center", "labelArrow": "none", "label": "%"},
+      "y": {"label": null},
       "marks": [
          Plot.ruleY([0]),
          Plot.lineY(county, {
             "x": "year",
-            "y": "endorsements per county / county population",
-            "stroke": "magenta",
-         }),
-         Plot.lineY(county, {
-            "x": "year",
-            "y": "endorsements per county / state population",
-            "stroke": "red",
-         }),
-         Plot.lineY(county, {
-            "x": "year",
-            "y": "endorsements per county / state endorsements",
-            "stroke": "yellow",
-         }),
-         Plot.lineY(county, {
-            "x": "year",
-            "y": "county population / state population",
-            "stroke": "green",
-         }),
-         Plot.tip(county, Plot.pointerX({
-            "x": "year",
-            "y": "endorsements per county / county population",
-            "title": d => `fill me in`
-         }))
+            "y": {
+               "label": "% change",
+               "value": "population percent difference"
+            },
+            "channels": {
+               "population difference": {
+                  "label": "difference",
+                  "value": "population difference"
+               }
+            },
+            "tip": {
+               "format": {
+                  "x": true,
+                  "y": d => `${d.toFixed(2)} %`,
+                  "population difference": true
+               }
+            }
+         })
       ]
    })
 
+   line_graph_el.append(line_plot)
+
+   line_plot = Plot.plot({
+      "title": `Motorcycle Endorsements / Population of ${sc} County`,
+      "x": {"type": "point"},
+      "y": {"label": null},
+      "marks": [
+         Plot.ruleY([0]),
+         Plot.lineY(county, {
+            "x": "year",
+            "y": {
+               "label": "ratio",
+               "value": "endorsements per county / county population"
+            },
+            "channels": {
+               "endorsements": "endorsements",
+               "population": "population"
+            },
+            "tip": {
+               "format": {
+                  "x": true,
+                  "y": d => `${d.toFixed(2)} %`,
+                  "endorsements": true,
+                  "population": true
+               }
+            }
+         })
+      ]
+   })
+   
+   line_graph_el.append(line_plot)
+   
+   line_plot = Plot.plot({
+      "title": `Motorcycle Endorsements of ${sc} County / State Population`,
+      "x": {"type": "point"},
+      "y": {"label": null},
+      "marks": [
+         Plot.ruleY([0]),
+         Plot.lineY(county, {
+            "x": "year",
+            "y": {
+               "label": "ratio",
+               "value": "endorsements per county / state population"
+            },
+            "channels": {
+               "endorsements": {
+                  "label": "endorsements",
+                  "value": "endorsements"
+               },
+               "state population": {
+                  "label": "population",
+                  "value": "state population"
+               }
+            },
+            "tip": {
+               "format": {
+                  "x": true,
+                  "y": d => `${d.toFixed(2)} %`,
+                  "endorsements": true,
+                  "state population": true
+               }
+            }
+         })
+      ]
+   })
+   
+   line_graph_el.append(line_plot)
+   
+   line_plot = Plot.plot({
+      "title": `Motorcycle Endorsements of ${sc} County / State Endorsements`,
+      "x": {"type": "point"},
+      "y": {"label": null},
+      "marks": [
+         Plot.ruleY([0]),
+         Plot.lineY(county, {
+            "x": "year",
+            "y": {
+               "label": "ratio",
+               "value": "endorsements per county / state endorsements"
+            },
+            "channels": {
+               "endorsements": {
+                  "label": "county",
+                  "value": "endorsements"
+               },
+               "state endorsements": {
+                  "label": "state",
+                  "value": "state endorsements"
+               }
+            },
+            "tip": {
+               "format": {
+                  "x": true,
+                  "y": d => `${d.toFixed(2)} %`,
+                  "endorsements": true,
+                  "state endorsements": true
+               }
+            }
+         })
+      ]
+   })
+   
+   line_graph_el.append(line_plot)
+   
+   line_plot = Plot.plot({
+      "title": `Population of ${sc} County / State Population`,
+      "x": {"type": "point"},
+      "y": {"label": null},
+      "marks": [
+         Plot.ruleY([0]),
+         Plot.lineY(county, {
+            "x": "year",
+            "y": {
+               "label": "ratio",
+               "value": "county population / state population"
+            },
+            "channels": {
+               "population": {
+                  "label": "county",
+                  "value": "population"
+               },
+               "state population": {
+                  "label": "state",
+                  "value": "state population"
+               }
+            },
+            "tip": {
+               "format": {
+                  "x": true,
+                  "y": d => `${d.toFixed(2)} %`,
+                  "population": true,
+                  "state population": true
+               }
+            }
+         })
+      ]
+   })
+   
    line_graph_el.append(line_plot)
 }
+
+draw_map()
+draw_graphs()
