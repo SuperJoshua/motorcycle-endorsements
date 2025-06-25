@@ -126,17 +126,21 @@ function draw_map() {
             "stroke": "black",
             "channels": {
                "county": {
-                  "label": "",
+                  "label": "county",
                   "value": "NAME"
                }
             },
-            "tip": {
-               "county": d => `${d} County`
-            }
+            /*
+            While I managed to get the tip stuff working for the line charts, geo just plain doesn't seem to want to work with me.
+            */
+            "tip": "xy"
          })
       ]
    })
 
+   /*
+   I could definitely do without the "click-to-stick" feature, but, looking at the issue on Github -- https://github.com/observablehq/plot/issues/1832 -- there seems to be no simple way to do that yet. So, I'll leave it alone.
+   */
    map_plot.addEventListener("input", () => {sc = map_plot.value.properties.NAME})
 
    map_el.append(map_plot)

@@ -24,7 +24,7 @@ During the course of graphing, I noticed another anomaly. Jefferson county had a
 
 [Plot](https://observablehq.com/plot/) (and, intrinsically, [D3](https://d3js.org/)) was used for the visualizations.
 
-The map of Florida was extracted from [US Census data](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html), after converting it to geojson with [MyGeodata](https://mygeodata.cloud/).
+The map of Florida was extracted from [US Census data](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html), after converting it to geojson with [MyGeodata](https://mygeodata.cloud/). I found out, later, that Mike (D3) also made [software for such a conversion](https://github.com/mbostock/shapefile). Next time, I should try that, since the software that I used has a pretty limited trial. Or, maybe, just use [another option](https://mapshaper.org/). 
 
 ## Citations
 
