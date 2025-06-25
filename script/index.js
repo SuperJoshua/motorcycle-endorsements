@@ -1,14 +1,11 @@
 "use strict";
 
 /*
-const counties = await d3.json("../res/counties.json")
-const florida = await d3.json("../res/florida.json")
-const map = await d3.json("../res/map.json")
+I still don't understand the reasoning behind not being able to load local files. That, or I don't understand how to do it properly. I'd like to be able to load JSON from a relative path -- which does work, by the way, on my computer, but not after I upload it to GitHub -- since my solution, below, is frowned on. But it doesn't make practical sense for me to have to fetch it from a server. It'd be like getting rid of all books and having to go to a store or library any time that I wanted to read anything.
 */
-
-const counties = await fetch("../res/counties.json").then(res => res.json())
-const florida = await fetch("../res/florida.json").then(res => res.json())
-const map = await fetch("../res/map.json").then(res => res.json())
+import {counties} from "../res/counties.js"
+import {florida} from "../res/florida.js"
+import {map} from "../res/map.js"
 
 // div elements
 const map_el = document.querySelector("#choropleth")
@@ -28,10 +25,10 @@ map_year_el.addEventListener("change", draw_map)
 /*
 What is this mess? This is me trying to keep the file size down by calculating all of these values from the few, rather than having them all precalculated in a big file.
 */
-const years = florida.map(d => d["year"]).sort()
-const names = [... new Set(counties.map(d => d["county"]))]
+const years = florida.map((d) => d["year"]).sort()
+const names = [... new Set(counties.map((d) => d["county"]))]
 
-// florida by year...
+// Florida by year...
 const fby = {}
 let fby_index = 0
 for (const y of years) {
@@ -44,7 +41,7 @@ const cby = {}
 for (const y of years) {
    cby[y] = {}
    for (const name of names) {
-      cby[y][name] = counties.filter(d => d["year"] == y && d["county"] == name)[0]
+      cby[y][name] = counties.filter((d) => d["year"] == y && d["county"] == name)[0]
    }
 }
 
@@ -73,7 +70,7 @@ for (const y in cby) {
    }
 }
 
-const data_types = Object.keys(cby[years[0]][names[0]]).filter(k => !(k == "county" || k == "year"))
+const data_types = Object.keys(cby[years[0]][names[0]]).filter((k) => !(k == "county" || k == "year"))
 
 // add options
 for (const y of years) {
@@ -128,7 +125,7 @@ function draw_map() {
       "y": {"axis": null},
       "marks": [
          Plot.geo(map, {
-            "fill": d => cby[sy][d["properties"]["NAME"]][sd],
+            "fill": (d) => cby[sy][d["properties"]["NAME"]][sd],
             "stroke": "black",
             "channels": {
                "county": {
@@ -146,9 +143,17 @@ function draw_map() {
 
    /*
    I could definitely do without the "click-to-stick" feature, but, looking at the issue on Github -- https://github.com/observablehq/plot/issues/1832 -- there seems to be no simple way to do that yet. So, I'll leave it alone.
+   
+   I still have a weird bug, here, too, where I'm informed that map_plot.value = null. It looks likes this occurs when the mouse cursor passes from outside the state into the state. I get it -- there's no value for the "ocean". But how do I fix this? This try-catch block seems to work.
    */
-   // I still have a weird bug, here, too, where I'm informed that map_plot.value = null.
-   map_plot.addEventListener("input", () => {sc = map_plot.value.properties.NAME})
+   map_plot.addEventListener("input", () => {
+      try {
+         sc = map_plot.value.properties.NAME
+      }
+      catch (err) {
+         "ignore"
+      }
+   })
 
    map_el.append(map_plot)
 }
@@ -193,7 +198,7 @@ function draw_graphs() {
                   "x": true,
                   "y": true,
                   "endorsement difference": true,
-                  "endorsement percent difference": d => `${d.toFixed(2)} %`
+                  "endorsement percent difference": (d) => `${d.toFixed(2)} %`
                }
             }
          })
@@ -225,7 +230,7 @@ function draw_graphs() {
                   "x": true,
                   "y": true,
                   "population difference": true,
-                  "population percent difference": d => `${d.toFixed(2)} %`
+                  "population percent difference": (d) => `${d.toFixed(2)} %`
                }
             }
          })
@@ -255,7 +260,7 @@ function draw_graphs() {
             "tip": {
                "format": {
                   "x": true,
-                  "y": d => `${d.toFixed(2)} %`,
+                  "y": (d) => `${d.toFixed(2)} %`,
                   "endorsement difference": true
                }
             }
@@ -286,7 +291,7 @@ function draw_graphs() {
             "tip": {
                "format": {
                   "x": true,
-                  "y": d => `${d.toFixed(2)} %`,
+                  "y": (d) => `${d.toFixed(2)} %`,
                   "population difference": true
                }
             }
@@ -315,7 +320,7 @@ function draw_graphs() {
             "tip": {
                "format": {
                   "x": true,
-                  "y": d => `${d.toFixed(2)} %`,
+                  "y": (d) => `${d.toFixed(2)} %`,
                   "endorsements": true,
                   "population": true
                }
@@ -351,7 +356,7 @@ function draw_graphs() {
             "tip": {
                "format": {
                   "x": true,
-                  "y": d => `${d.toFixed(2)} %`,
+                  "y": (d) => `${d.toFixed(2)} %`,
                   "endorsements": true,
                   "state population": true
                }
@@ -387,7 +392,7 @@ function draw_graphs() {
             "tip": {
                "format": {
                   "x": true,
-                  "y": d => `${d.toFixed(2)} %`,
+                  "y": (d) => `${d.toFixed(2)} %`,
                   "endorsements": true,
                   "state endorsements": true
                }
@@ -423,7 +428,7 @@ function draw_graphs() {
             "tip": {
                "format": {
                   "x": true,
-                  "y": d => `${d.toFixed(2)} %`,
+                  "y": (d) => `${d.toFixed(2)} %`,
                   "population": true,
                   "state population": true
                }
