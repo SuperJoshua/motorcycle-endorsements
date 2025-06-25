@@ -6,6 +6,7 @@ const map = await d3.json("../res/map.json")
 
 // div elements
 const map_el = document.querySelector("#choropleth")
+map_el.addEventListener("click", draw_graphs)
 const line_graph_el = document.querySelector("#line_graph")
 
 // animation button
@@ -21,7 +22,6 @@ map_year_el.addEventListener("change", draw_map)
 /*
 What is this mess? This is me trying to keep the file size down by calculating all of these values from the few, rather than having them all precalculated in a big file.
 */
-// Begin mess...
 const years = florida.map(d => d["year"]).sort()
 const names = [... new Set(counties.map(d => d["county"]))]
 
@@ -68,7 +68,6 @@ for (const y in cby) {
 }
 
 const data_types = Object.keys(cby[years[0]][names[0]]).filter(k => !(k == "county" || k == "year"))
-// End mess... At least, the former mess.
 
 // add options
 for (const y of years) {
@@ -88,7 +87,7 @@ for (const d of data_types) {
 // selected year, selected data, selected county...
 let sy = map_year_el.value
 let sd = map_data_el.value
-let sc = names[names.indexOf("Miami-Dade")]
+let sc = names[names.indexOf("Highlands")]
 
 function animate_map() {
    let t = 0
@@ -103,7 +102,7 @@ function animate_map() {
 }
 
 /*
-And after trying to get things dynamic... how am I supposed to sort the graphs between linear and percentage? I'm still hand-coding this thing. Not that I'm against that, but this is unintentionally hybrid.
+And after trying to get things dynamic... how am I supposed to discriminate between linear and percentage? I'm still hand-coding this thing. Not that I'm against that, but this is unintentionally hybrid.
 */
 function draw_map() {
    sy = map_year_el.value
@@ -125,10 +124,20 @@ function draw_map() {
          Plot.geo(map, {
             "fill": d => cby[sy][d["properties"]["NAME"]][sd],
             "stroke": "black",
-            "tip": "xy"
+            "channels": {
+               "county": {
+                  "label": "",
+                  "value": "NAME"
+               }
+            },
+            "tip": {
+               "county": d => `${d} County`
+            }
          })
       ]
    })
+
+   map_plot.addEventListener("input", () => {sc = map_plot.value.properties.NAME})
 
    map_el.append(map_plot)
 }

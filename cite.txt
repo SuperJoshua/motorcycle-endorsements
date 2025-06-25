@@ -27,7 +27,7 @@ Annual Estimates of the Resident Population for the United States, Regions, Stat
 Source: U.S. Census Bureau, Population Division
 Release Date: December 2024
 
-A copy of this file isn't included.
+A copy of the following file is not included.
 
 (https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_county_20m.zip)
 U.S. Department of Commerce, U.S. Census Bureau, Geography Division
