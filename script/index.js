@@ -1,8 +1,14 @@
 "use strict";
 
+/*
 const counties = await d3.json("../res/counties.json")
 const florida = await d3.json("../res/florida.json")
 const map = await d3.json("../res/map.json")
+*/
+
+const counties = await fetch("../res/counties.json").then(res => res.json())
+const florida = await fetch("../res/florida.json").then(res => res.json())
+const map = await fetch("../res/map.json").then(res => res.json())
 
 // div elements
 const map_el = document.querySelector("#choropleth")
@@ -141,6 +147,7 @@ function draw_map() {
    /*
    I could definitely do without the "click-to-stick" feature, but, looking at the issue on Github -- https://github.com/observablehq/plot/issues/1832 -- there seems to be no simple way to do that yet. So, I'll leave it alone.
    */
+   // I still have a weird bug, here, too, where I'm informed that map_plot.value = null.
    map_plot.addEventListener("input", () => {sc = map_plot.value.properties.NAME})
 
    map_el.append(map_plot)
