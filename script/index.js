@@ -208,6 +208,7 @@ function draw_graphs() {
    line_graph_el.append(line_plot)
    
    line_plot = Plot.plot({
+      "marginLeft": 50,
       "title": `Population of ${sc} County`,
       "x": {"type": "point"},
       "y": {"label": null},
