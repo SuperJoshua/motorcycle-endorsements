@@ -70,7 +70,7 @@ for (const y in cby) {
    }
 }
 
-const data_types = Object.keys(cby[years[0]][names[0]]).filter((k) => !(k == "county" || k == "year"))
+const data_types = Object.keys(cby[years[0]][names[0]]).filter((k) => !(k == "county" || k == "year" || k == "state endorsements" || k == "state population"))
 
 // add options
 for (const y of years) {
@@ -127,16 +127,8 @@ function draw_map() {
          Plot.geo(map, {
             "fill": (d) => cby[sy][d["properties"]["NAME"]][sd],
             "stroke": "black",
-            "channels": {
-               "county": {
-                  "label": "county",
-                  "value": "NAME"
-               }
-            },
-            /*
-            While I managed to get the tip stuff working for the line charts, geo just plain doesn't seem to want to work with me.
-            */
-            "tip": "xy"
+            "tip": true,
+            "title": (d) => `${d["properties"]["NAME"]}\n${cby[sy][d["properties"]["NAME"]][sd].toFixed(2)}`
          })
       ]
    })
